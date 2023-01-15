@@ -141,8 +141,8 @@
                 android:background="@drawable/all_rounded_corners_small_btn"
                 android:gravity="center"
                 android:padding="10dp"
-                android:text="Add Tags"
-                android:textColor="@color/royal_blue"
+                android:hint="Add Tags"
+                android:textColorHint="@color/royal_blue"
                 android:textSize="16sp"
                 app:drawableStartCompat="@drawable/ic_add_label" />
         </LinearLayout>

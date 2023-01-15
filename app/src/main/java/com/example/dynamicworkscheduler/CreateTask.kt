@@ -26,8 +26,7 @@ import java.util.*
 @Suppress("DEPRECATION")
 class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
     private lateinit var mDurationSpinner: Spinner
-    private var selectedDateIndex = -1
-    private var selectedDate = "00"
+    private var selectedDate = ""
     private var category = "Select Category of Task"
     private var priority = "+"
     private lateinit var cat1Ll: LinearLayout
@@ -57,8 +56,7 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
     private lateinit var end_selected_time: String
     private lateinit var duration_array_adapter: ArrayAdapter<String>
     var duration_time = arrayOf("< 30 mins", "< 1hr", "1hrs - 2 hrs", "2hrs - 3hrs")
-    var category_list =
-        arrayOf("Design", "Develop", "Blog", "Sales", "Backend", "FrontEnd", "Business")
+    var category_list = arrayOf("Design", "Develop", "Blog", "Sales", "Backend", "FrontEnd", "Business")
     private lateinit var mDay1: LinearLayout
     private lateinit var mDay2: LinearLayout
     private lateinit var mDay3: LinearLayout
@@ -88,6 +86,8 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
     var duration = 0
     var weekListDates = mutableListOf<String>()
     var weekListBoolean = mutableListOf<Boolean>()
+    var validations = mutableListOf<Boolean>() /* 0 -> title, 1 -> priority, 2 -> category, 3 -> Deadline , 4 -> Start_Time & End_TIme || Duration */
+
     @SuppressLint("UseCompatLoadingForDrawables", "CutPasteId")
     @RequiresApi(api = Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -256,6 +256,9 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
             val mokBtn = mShowTaskCategoryListDialog.findViewById<Button>(R.id.Ok_BTN)
             mokBtn.setOnClickListener {
                 mSelectCategoryTv.text = category
+
+                validations[2] = true
+
                 mShowTaskCategoryListDialog.dismiss()
             }
         }
@@ -469,6 +472,8 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
 //                Toast.makeText(this, "Day1", Toast.LENGTH_SHORT).show()
             }
             if(!weekListBoolean[0]) {
+
+                validations[3] = true
                 selectedDate =
                     "${LocalDate.now().year}-${sdf.format(calendar.time.month + 1)}-${mDay_date1.text}"
             }else{
@@ -936,7 +941,7 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
 
             }
 //
-        //               Toast.makeText(this, "Day1", Toast.LENGTH_SHORT).show()
+            //               Toast.makeText(this, "Day1", Toast.LENGTH_SHORT).show()
             if(!weekListBoolean[5]) {
                 selectedDate =
                     "${LocalDate.now().year}-${sdf.format(calendar.time.month + 1)}-${mDay_date6.text}"
@@ -1042,7 +1047,6 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
 
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        Toast.makeText(this,parent?.getItemAtPosition(position).toString(),Toast.LENGTH_SHORT).show()
         when(parent?.getItemAtPosition(position).toString()){
             "< 30 mins" -> duration = 30
             "< 1hr" -> duration = 60
@@ -1072,22 +1076,28 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
         val selctcategory=binding.SelectCategoryTV
         val starttimebtnval=binding.AssignStartTimeBTN
         val endtimebtnval=binding.AssignEndTimeBTN
+
         if(title.text.isEmpty()||title.text.startsWith(" ")) {
             title.error="Enter title for Task"
         }
+        else validations[0] = true
+
         if(priorityval.text=="+")
         {
             Toast.makeText(this,"select priority for the task",Toast.LENGTH_SHORT).show()
         }
-        if(description.text.isEmpty()||description.text.startsWith(" ")) {
-            description.error="Enter Description for Task"
+        else validations[1] = true
+
+        if(selctcategory.text=="Select Category of Task") {
+            Toast.makeText(this, "select task category", Toast.LENGTH_SHORT).show()
         }
 
-        if(selctcategory.text=="Select Category of Task")
-        {
-            Toast.makeText(this,"select task category",Toast.LENGTH_SHORT).show()
-        }
-        if(category!="Category-3") {
+        // category 1 and 2
+
+
+
+
+        if(category != "Category-3") {
             if (starttimebtnval.text == "00:00") {
                 Toast.makeText(this, "select start time", Toast.LENGTH_SHORT).show()
             }
@@ -1236,28 +1246,28 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
 //
 //                }
 
-                    mShowSameTaskError.dismiss()
-                    task = TaskData(
-                        taskId = MyApplication.createTaskId(
-                            createdTime = currentTime,
-                            createdDate = currentDate
-                        ),
-                        title = title,
-                        priority = priority,
-                        category = category,
-                        startDate = currentDate,
-                        deadlineDate = selectedDate,
-                        startTime = start_selected_time,
-                        endTime = end_selected_time,
-                        description = description,
-                        status = "pending",
-                        duration = duration,
-                        weekNumber = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) - 1
-                    )
-                    mTaskViewModel.addTask(task)
-                    startActivity(Intent(this,MainActivity::class.java))
-                    finish()
-                    Toast.makeText(this,"Successfully added!",Toast.LENGTH_SHORT).show()
+                mShowSameTaskError.dismiss()
+                task = TaskData(
+                    taskId = MyApplication.createTaskId(
+                        createdTime = currentTime,
+                        createdDate = currentDate
+                    ),
+                    title = title,
+                    priority = priority,
+                    category = category,
+                    startDate = currentDate,
+                    deadlineDate = selectedDate,
+                    startTime = start_selected_time,
+                    endTime = end_selected_time,
+                    description = description,
+                    status = "pending",
+                    duration = duration,
+                    weekNumber = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR) - 1
+                )
+                mTaskViewModel.addTask(task)
+                startActivity(Intent(this,MainActivity::class.java))
+                finish()
+                Toast.makeText(this,"Successfully added!",Toast.LENGTH_SHORT).show()
 
             }
         }
@@ -1273,34 +1283,34 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
                 mAssign_end_time_BTN.text =
                     String.format(Locale.getDefault(), "%02d : %02d", 0, 0)
             }else{
-            if (startHours < endHours && duration < 45) {
-                mAssign_start_time_BTN.text = start_selected_time
-                mAssign_end_time_BTN.text =
-                    String.format(Locale.getDefault(), "%02d : %02d", endHours, endMinute)
-                end_selected_time =
-                    String.format(Locale.getDefault(), "%02d:%02d", endHours, endMinute)
-            } else if (startHours == endHours && (endMinute >=(15 + startMinute))) {
-                mAssign_start_time_BTN.text = start_selected_time
-                mAssign_end_time_BTN.text =
-                    String.format(Locale.getDefault(), "%02d : %02d", endHours, endMinute)
-                end_selected_time =
-                    String.format(Locale.getDefault(), "%02d:%02d", endHours, endMinute)
-            } else {
-                if (startHours > endHours) {
-                    Toast.makeText(this, "Invalid End-time", Toast.LENGTH_SHORT).show()
+                if (startHours < endHours && duration < 45) {
+                    mAssign_start_time_BTN.text = start_selected_time
                     mAssign_end_time_BTN.text =
-                        String.format(Locale.getDefault(), "%02d : %02d", 0, 0)
-                }
-                if (endMinute < (startMinute + 15)) {
-                    Toast.makeText(
-                        this,
-                        "Duration must be more than 15 minutes",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        String.format(Locale.getDefault(), "%02d : %02d", endHours, endMinute)
+                    end_selected_time =
+                        String.format(Locale.getDefault(), "%02d:%02d", endHours, endMinute)
+                } else if (startHours == endHours && (endMinute >=(15 + startMinute))) {
+                    mAssign_start_time_BTN.text = start_selected_time
                     mAssign_end_time_BTN.text =
-                        String.format(Locale.getDefault(), "%02d : %02d", 0, 0)
+                        String.format(Locale.getDefault(), "%02d : %02d", endHours, endMinute)
+                    end_selected_time =
+                        String.format(Locale.getDefault(), "%02d:%02d", endHours, endMinute)
+                } else {
+                    if (startHours > endHours) {
+                        Toast.makeText(this, "Invalid End-time", Toast.LENGTH_SHORT).show()
+                        mAssign_end_time_BTN.text =
+                            String.format(Locale.getDefault(), "%02d : %02d", 0, 0)
+                    }
+                    if (endMinute < (startMinute + 15)) {
+                        Toast.makeText(
+                            this,
+                            "Duration must be more than 15 minutes",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        mAssign_end_time_BTN.text =
+                            String.format(Locale.getDefault(), "%02d : %02d", 0, 0)
+                    }
                 }
-            }
             }
         } else {
             Toast.makeText(this, "End time or start time should not be greater than your working hours", Toast.LENGTH_LONG).show()
@@ -1316,7 +1326,7 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
         val currentTimeHour=calendar.time.hours
         val currentTimeMinute=calendar.time.minutes
         if(calendar.time.date==endDate.date) {
-           // if(startHours in 9..16) {
+            // if(startHours in 9..16) {
             if(startHours in 9..23) {
 
                 if(startHours==currentTimeHour&&startMinute >= (currentTimeMinute+5))
@@ -1330,7 +1340,7 @@ class CreateTask : AppCompatActivity(),AdapterView.OnItemSelectedListener{
                     mAssign_start_time_BTN.text = startSelectedTime
                     start_selected_time = String.format(Locale.getDefault(), "%02d:%02d", startHours, startMinute)
                 }
-              //  else if(if )
+                //  else if(if )
                 else{
                     Toast.makeText(this,"start time should be 5 min more than current time",Toast.LENGTH_SHORT).show()
                     mAssign_start_time_BTN.text = String.format(Locale.getDefault(), "%02d : %02d", 0, 0)
